@@ -1,3 +1,12 @@
+This is my very own hack of this nice little program to display the two clocks
+that matter to me at that time, UTC and CET.  It's probably not useful to you
+unless you fork and update.
+
+Bertrand
+
+---
+
+
 This is an obscenely simple program to add the UTC time to the MacOS
 Menu Status Bar. I desperately wanted two clocks as the network that I
 work on uses UTC Time exclusively for all of our devices. Converting
