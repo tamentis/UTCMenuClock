@@ -73,79 +73,29 @@ NSMenuItem *showTimeZoneItem;
 
 }
 
-- (void) openGithubURL:(id)sender {
-    [[NSWorkspace sharedWorkspace]
-        openURL:[NSURL URLWithString:@"http://github.com/netik/UTCMenuClock"]];
-}
-
 
 - (void) doDateUpdate {
 
-    NSDate* date = [NSDate date];
-    NSDateFormatter* UTCdf = [[[NSDateFormatter alloc] init] autorelease];
-    NSDateFormatter* UTCdateDF = [[[NSDateFormatter alloc] init] autorelease];
-    NSDateFormatter* UTCdateShortDF = [[[NSDateFormatter alloc] init] autorelease];
-    NSDateFormatter* UTCdaynum = [[[NSDateFormatter alloc] init] autorelease];
-    
-    NSTimeZone* UTCtz = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    NSDate* date1 = [NSDate date];
+    NSDate* date2 = [NSDate date];
+    NSDateFormatter* df1 = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter* df2 = [[[NSDateFormatter alloc] init] autorelease];
 
-    [UTCdf setTimeZone: UTCtz];
-    [UTCdateDF setTimeZone: UTCtz];
-    [UTCdateShortDF setTimeZone: UTCtz];
-    [UTCdaynum setTimeZone: UTCtz];
+    NSTimeZone* tz1 = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+    NSTimeZone* tz2 = [NSTimeZone timeZoneWithName:@"Europe/Paris"];
 
-    BOOL showDate = [self fetchBooleanPreference:@"ShowDate"];
-    BOOL showSeconds = [self fetchBooleanPreference:@"ShowSeconds"];
-    BOOL showJulian = [self fetchBooleanPreference:@"ShowJulianDate"];
-    BOOL showTimeZone = [self fetchBooleanPreference:@"ShowTimeZone"];
-    
-    if (showSeconds){
-        [UTCdf setDateFormat: @"HH:mm:ss"];
-    } else {
-        [UTCdf setDateFormat: @"HH:mm"];
-    }
+    [df1 setTimeZone: tz1];
+    [df1 setDateFormat: @"HH:mm"];
+    [df2 setTimeZone: tz2];
+    [df2 setDateFormat: @"HH:mm"];
 
-    [UTCdateDF setDateStyle:NSDateFormatterFullStyle];
-    [UTCdateShortDF setDateStyle:NSDateFormatterShortStyle];
-    [UTCdaynum setDateFormat:@"D/"];
+    NSString* UTCtimepart1 = [df1 stringFromDate: date1];
+    NSString* UTCtimepart2 = [df2 stringFromDate: date2];
 
-    NSString* UTCtimepart = [UTCdf stringFromDate: date];
-    NSString* UTCdatepart = [UTCdateDF stringFromDate: date];
-    NSString* UTCdateShort = [UTCdateShortDF stringFromDate: date];
-    NSString* UTCJulianDay;
-    NSString* UTCTzString;
-    
-    
-    if (showJulian) { 
-        UTCJulianDay = [UTCdaynum stringFromDate: date];
-    } else { 
-        UTCJulianDay = @"";
-    }
-    
-    if (showTimeZone) { 
-        UTCTzString = @" UTC";
-    } else { 
-        UTCTzString = @"";
-    }
-
-    if (showDate) {
-        [ourStatus setTitle:[NSString stringWithFormat:@"%@ %@%@%@", UTCdateShort, UTCJulianDay, UTCtimepart, UTCTzString]];
-    } else {
-        [ourStatus setTitle:[NSString stringWithFormat:@"%@%@%@", UTCJulianDay, UTCtimepart, UTCTzString]];
-    }
-
-    [dateMenuItem setTitle:UTCdatepart];
-
+    [ourStatus setTitle:[NSString stringWithFormat:@"%@ UTC  %@ CET", UTCtimepart1, UTCtimepart2]];
 }
 
-- (IBAction)showFontMenu:(id)sender {
-    NSFontManager *fontManager = [NSFontManager sharedFontManager];
-    [fontManager setDelegate:self];
-    
-    NSFontPanel *fontPanel = [fontManager fontPanel:YES];
-    [fontPanel makeKeyAndOrderFront:sender];
-}
-// this is the main work loop, fired on 1s intervals.
+// this is the main work loop, fired on 60s intervals.
 - (void) fireTimer:(NSTimer*)theTimer {
     [self doDateUpdate];
 }
@@ -194,102 +144,22 @@ NSMenuItem *showTimeZoneItem;
     NSMenuItem *mainItem = [[NSMenuItem alloc] init];
     dateMenuItem = mainItem;
 
-    NSMenuItem *cp1Item = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *cp2Item = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *cp3Item = [[[NSMenuItem alloc] init] autorelease];
     NSMenuItem *quitItem = [[[NSMenuItem alloc] init] autorelease];
     NSMenuItem *launchItem = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *showDateItem = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *showSecondsItem = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *showJulianItem = [[[NSMenuItem alloc] init] autorelease];
- //   NSMenuItem *changeFontItem = [[[NSMenuItem alloc] init] autorelease];
-    
+
     showTimeZoneItem = [[[NSMenuItem alloc] init] autorelease];
-    NSMenuItem *sep1Item = [NSMenuItem separatorItem];
-    NSMenuItem *sep2Item = [NSMenuItem separatorItem];
-    NSMenuItem *sep3Item = [NSMenuItem separatorItem];
-    NSMenuItem *sep4Item = [NSMenuItem separatorItem];
-    
+    NSMenuItem *sepItem = [NSMenuItem separatorItem];
+
     [mainItem setTitle:@""];
-
-    [cp1Item setTitle:@"UTC Menu Clock v1.2"];
-    [cp2Item setTitle:@"jna@retina.net"];
-    [cp3Item setTitle:@"http://github.com/netik/UTCMenuClock"];
-
-    [cp3Item setEnabled:TRUE];
-    [cp3Item setAction:@selector(openGithubURL:)];
 
     [launchItem setTitle:@"Open at Login"];
     [launchItem setEnabled:TRUE];
     [launchItem setAction:@selector(toggleLaunch:)];
 
-    [showDateItem setTitle:@"Show Date"];
-    [showDateItem setEnabled:TRUE];
-    [showDateItem setAction:@selector(togglePreference:)];
-
-    [showSecondsItem setTitle:@"Show Seconds"];
-    [showSecondsItem setEnabled:TRUE];
-    [showSecondsItem setAction:@selector(togglePreference:)];
-    
-    [showJulianItem setTitle:@"Show Julian Date"];
-    [showJulianItem setEnabled:TRUE];
-    [showJulianItem setAction:@selector(togglePreference:)];
-
-    [showTimeZoneItem setTitle:@"Show Time Zone"];
-    [showTimeZoneItem setEnabled:TRUE];
-    [showTimeZoneItem setAction:@selector(togglePreference:)];
-    
- //   [changeFontItem setTitle:@"Change Font..."];
-  //  [changeFontItem setAction:@selector(showFontMenu:)];
-    
     [quitItem setTitle:@"Quit"];
     [quitItem setEnabled:TRUE];
     [quitItem setAction:@selector(quitProgram:)];
 
-    [mainMenu addItem:mainItem];
-    // "---"
-    [mainMenu addItem:sep2Item];
-    // "---"
-    [mainMenu addItem:cp1Item];
-    [mainMenu addItem:cp2Item];
-    // "---"
-    [mainMenu addItem:sep1Item];
-    [mainMenu addItem:cp3Item];
-    // "---"
-    [mainMenu addItem:sep3Item];
-
-    // showDateItem
-    BOOL showDate = [self fetchBooleanPreference:@"ShowDate"];
-    BOOL showSeconds = [self fetchBooleanPreference:@"ShowSeconds"];
-    BOOL showJulian = [self fetchBooleanPreference:@"ShowJulianDate"];
-    BOOL showTimeZone = [self fetchBooleanPreference:@"ShowTimeZone"];
-    
-    // TODO: DRY this up a bit. 
-    if (showDate) {
-        [showDateItem setState:NSOnState];
-    } else {
-        [showDateItem setState:NSOffState];
-    }
-
-    if (showSeconds) {
-        [showSecondsItem setState:NSOnState];
-    } else {
-        [showSecondsItem setState:NSOffState];
-    }
-
-    if (showJulian) {
-        [showJulianItem setState:NSOnState];
-    } else {
-        [showJulianItem setState:NSOffState];
-    }
-    
-    if (showTimeZone) {
-        [showTimeZoneItem setState:NSOnState];
-    } else {
-        [showTimeZoneItem setState:NSOffState];
-    }
-    
-    // latsly, deal with Launch at Login
     LaunchAtLoginController *launchController = [[LaunchAtLoginController alloc] init];
     BOOL launch = [launchController launchAtLogin];
     [launchController release];
@@ -301,13 +171,7 @@ NSMenuItem *showTimeZoneItem;
     }
 
     [mainMenu addItem:launchItem];
-    [mainMenu addItem:showDateItem];
-    [mainMenu addItem:showSecondsItem];
-    [mainMenu addItem:showJulianItem];
-    [mainMenu addItem:showTimeZoneItem];
-  //  [mainMenu addItem:changeFontItem];
-    // "---"
-    [mainMenu addItem:sep4Item];
+    [mainMenu addItem:sepItem];
     [mainMenu addItem:quitItem];
 
     [theItem setMenu:(NSMenu *)mainMenu];
@@ -316,7 +180,7 @@ NSMenuItem *showTimeZoneItem;
     [self doDateUpdate];
 
     NSNumber *myInt = [NSNumber numberWithInt:1];
-    [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(fireTimer:) userInfo:myInt repeats:YES];
+    [NSTimer scheduledTimerWithTimeInterval:60.0 target:self selector:@selector(fireTimer:) userInfo:myInt repeats:YES];
 
 
 }
